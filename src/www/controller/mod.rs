@@ -9,7 +9,6 @@ pub mod index {
 }
 
 pub mod not_found {
-    #[path = "../404/404.rs"]
-    pub mod controller;
-    pub use controller::NotFoundController;
+    pub mod not_found;
+    pub use not_found::NotFoundController;
 }
