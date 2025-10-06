@@ -6,7 +6,7 @@ mod template;
 mod component;
 mod generator;
 
-use std::{net::{TcpListener, TcpStream}};
+use std::{net::{TcpListener, TcpStream}, env};
 use std::thread;
 use crate::http::HttpInitializer;
 use crate::generator::StyleGenerator;
@@ -43,18 +43,27 @@ fn main() -> std::io::Result<()> {
 	let style_generator = StyleGenerator::new();
 	style_generator.generate();
 
-	// Start file watcher in background thread
-	let style_generator_clone = StyleGenerator::new();
-	thread::spawn(move || {
-		if let Err(e) = style_generator_clone.watch() {
-			eprintln!("File watcher error: {}", e);
-		}
-	});
+	let is_dev = env::var("FLY_APP_NAME").is_err();
+	
+	if is_dev {
+		let style_generator_clone = StyleGenerator::new();
+		thread::spawn(move || {
+			if let Err(e) = style_generator_clone.watch() {
+				eprintln!("File watcher error: {}", e);
+			}
+		});
+	}
 
 	let mut router = Router::new();
 	register_routes(&mut router);
 
-	let listener = TcpListener::bind("127.0.0.1:3001")?;
+	let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+	let bind_address = format!("0.0.0.0:{}", port);
+	
+	println!("Binding to {}", bind_address);
+	let listener = TcpListener::bind(&bind_address)?;
+	
+	println!("Server listening on {}", bind_address);
 
     for stream in listener.incoming() {
         handle_request(stream?, &router);
