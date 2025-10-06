@@ -1,0 +1,13 @@
+:root {
+	--font-family: 'Inter', sans-serif;
+	--container-width: 1200px;
+}
+
+body {
+	font-family: var(--font-family);
+}
+
+.container {
+	max-width: var(--container-width);
+	margin: 0 auto;
+}

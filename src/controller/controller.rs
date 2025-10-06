@@ -39,9 +39,7 @@ pub trait Controller: Template {
 				
 				if let Some(value) = variables.get(var_name) {
 					updated_template = updated_template.replace(&placeholder, value);
-					println!("Replaced '{}' with '{}'", placeholder, value);
 				} else {
-					println!("Variable '{}' not found in variables", var_name);
 					break;
 				}
 			} else {
@@ -55,37 +53,30 @@ pub trait Controller: Template {
 	fn replace_template_components(&self, template: String, request: &HttpRequest) -> String {
 		let mut updated_template = template;
 		
-		// Get all available components
 		let mut all_components = self.get_general_components();
 		let template_components = self.get_template_components();
 		
-		// Merge template-specific components with general ones
 		for (key, component) in template_components {
 			all_components.insert(key, component);
 		}
-
-		println!("Current template: {}", updated_template);
 		
-		// Find all {{#component}} patterns in the template
 		while let Some(start) = updated_template.find("{{#") {
 			if let Some(relative_end) = updated_template[start..].find("}}") {
-				let end = start + relative_end + 2; // +2 for the "}}"
+				let end = start + relative_end + 2;
 				
 				let placeholder = updated_template[start..end].to_string();
-				let component_name = &placeholder[3..placeholder.len()-2]; // Remove "{{#" and "}}"
+				let component_name = &placeholder[3..placeholder.len()-2];
 				
-				// Replace if we have this component
 				if let Some(component) = all_components.get(component_name) {
-					// Render the component
 					let component_html = component.build_component(request); // Assuming components have a render method
 					updated_template = updated_template.replace(&placeholder, &component_html);
 					println!("Replaced component '{}' with rendered HTML", placeholder);
 				} else {
 					println!("Component '{}' not found", component_name);
-					break; // Avoid infinite loop
+					break;
 				}
 			} else {
-				break; // No closing }} found
+				break;
 			}
 		}
 		
@@ -100,23 +91,18 @@ pub trait Controller: Template {
 			return;
 		}
 
-		println!("Template: {}", template);
+		// Add performance headers for CSS
+		response.preload_css("/pub/generated/style.css");
+		response.add_cache_headers();
 
 		let mut variables = self.get_template_variables(request);
 		
 		let page = self.render();
 		let page_with_variables = self.replace_template_variables(page, &variables);
 
-		println!("Page with variables: {}", page_with_variables);
-		
 		variables.insert("page".to_string(), page_with_variables);
 
-		// First replace variables
 		let template_with_variables = self.replace_template_variables(template, &variables);
-		
-		println!("Template with variables: {}", template_with_variables);
-		
-		// Then replace components
 		let final_template = self.replace_template_components(template_with_variables, request);
 		
 		response.set_body(final_template);

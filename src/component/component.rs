@@ -1,4 +1,4 @@
-use crate::http::{HttpResponse, HttpRequest};
+use crate::http::{HttpRequest};
 use crate::template::Template;
 use std::collections::HashMap;
 
@@ -17,9 +17,7 @@ pub trait Component: Template {
 				
 				if let Some(value) = variables.get(var_name) {
 					updated_template = updated_template.replace(&placeholder, value);
-					println!("Replaced '{}' with '{}'", placeholder, value);
 				} else {
-					println!("Variable '{}' not found in variables", var_name);
 					break;
 				}
 			} else {
@@ -32,7 +30,7 @@ pub trait Component: Template {
 
 	fn build_component(&self, request: &HttpRequest) -> String {
 		let template = self.render();
-		let mut variables = self.get_template_variables(request);
+		let variables = self.get_template_variables(request);
 		
 		let final_template = self.replace_template_variables(template, &variables);
 		

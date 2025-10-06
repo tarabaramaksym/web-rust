@@ -4,15 +4,21 @@ mod www;
 mod controller;
 mod template;
 mod component;
+mod generator;
 
 use std::{net::{TcpListener, TcpStream}};
+use std::thread;
 use crate::http::HttpInitializer;
+use crate::generator::StyleGenerator;
 use crate::router::Router;
 use crate::www::controller::index::HomeController;
 use crate::www::controller::about::AboutController;
 use crate::www::controller::not_found::NotFoundController;
+use std::time::Instant;
 
 fn handle_request(stream: TcpStream, router: &Router) {
+	let start = Instant::now();
+	
 	println!("Received request...");
 
 	let (request, mut response) = HttpInitializer::initialize(stream);
@@ -20,6 +26,9 @@ fn handle_request(stream: TcpStream, router: &Router) {
 	router.execute(&request, &mut response);
 	
 	response.send_response();
+
+	let duration = start.elapsed();
+	println!("Request processed in {:?}", duration);
 }
 
 fn register_routes(router: &mut Router) {
@@ -30,6 +39,17 @@ fn register_routes(router: &mut Router) {
 
 fn main() -> std::io::Result<()> {
 	println!("Starting server...");
+
+	let style_generator = StyleGenerator::new();
+	style_generator.generate();
+
+	// Start file watcher in background thread
+	let style_generator_clone = StyleGenerator::new();
+	thread::spawn(move || {
+		if let Err(e) = style_generator_clone.watch() {
+			eprintln!("File watcher error: {}", e);
+		}
+	});
 
 	let mut router = Router::new();
 	register_routes(&mut router);

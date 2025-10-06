@@ -1,0 +1,11 @@
+.header-links {
+	display: flex;
+	gap: 12px;
+	font-size: 24px;
+}
+
+.header-container {
+	display: flex;
+	gap: 32px;
+	align-items: center;
+}

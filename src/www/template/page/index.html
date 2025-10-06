@@ -3,12 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" sizes="16x16" type="image/png" href="/pub/media/favicon-16x16.png">
+	<link rel="icon" sizes="32x32" type="image/png" href="/pub/media/favicon-32x32.png">
+	<link rel="icon" type="image/svg+xml" href="/pub/media/favicon.svg">
+	<link rel="stylesheet" href="/pub/generated/style.css">
+	<link rel="preload" href="/pub/fonts/Inter_24pt-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+	<link rel="preload" href="/pub/fonts/Inter_24pt-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+	
     <title>{{$title}}</title>
 </head>
 <body>
 	{{#header}}
 
-	{{$page}}
+	<main>
+		<div class="container">
+			{{$page}}
+		</div>
+	</main>
 
 	{{#footer}}
 </body>
